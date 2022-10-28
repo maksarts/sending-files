@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cxf="http://camel.apache.org/schema/cxf"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:soap="http://cxf.apache.org/bindings/soap"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	    http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://camel.apache.org/schema/cxf
+        http://camel.apache.org/schema/cxf/camel-cxf.xsd
+    http://camel.apache.org/schema/spring
+        http://camel.apache.org/schema/spring/camel-spring.xsd
+    http://www.springframework.org/schema/osgi  http://www.springframework.org/schema/osgi/spring-osgi.xsd   
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+">
+
+	<bean id="archivesSendRoute" class="service.sendarchives.ArchivesSendRoute"/>
+
+	<bean id="shutdown" class="org.apache.camel.impl.DefaultShutdownStrategy">
+		<property name="timeout" value="10"/>
+	</bean>
+	
+	<bean id="bridgePropertyPlaceholder" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>file:${karaf.base}/etc/fileimport.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="ProcessSendEmail" scope="prototype" class="service.sendarchives.ProcessSendEmail" />
+	<bean id="ProcessIsEmptyDir" scope="prototype" class="service.sendarchives.ProcessIsEmptyDir" />
+	<bean id="RestController" scope="singleton" class="service.sendarchives.rest.RestController" />
+
+	<camelContext id="FileimportContext" xmlns="http://camel.apache.org/schema/spring">
+		<!--		<propertyPlaceholder id="properties" location="file:${karaf.base}/etc/cft.properties"/>-->
+		<routeBuilder ref="archivesSendRoute"/>
+		<routeBuilder ref="RestController"/>
+	</camelContext>
+
+</beans>
